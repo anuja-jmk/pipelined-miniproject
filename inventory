@@ -1,6 +1,7 @@
-#localhost ansible_connection=local
-[localhost]
-localhost ansible_python_interpreter=/usr/bin/python3 ansible_ssh_user=anuja ansible_ssh_pass=pass@123
+[local]
+localhost ansible_connection=local
+#[localhost]
+#localhost ansible_python_interpreter=/usr/bin/python3 ansible_ssh_user=anuja ansible_ssh_pass=pass@123
 
 
 
