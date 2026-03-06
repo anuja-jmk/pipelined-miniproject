@@ -1,8 +1,10 @@
 pipeline {
     agent any
+
     triggers { 
-      githubPush() 
-   }
+        githubPush() 
+    }
+
     environment {
         DOCKER_IMAGE_NAME = 'calculator'
         GITHUB_REPO_URL = 'https://github.com/anuja-jmk/pipelined-miniproject.git'
@@ -11,11 +13,10 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                script {
-                    git branch: 'main', url: "${GITHUB_REPO_URL}"
-                }
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
             }
         }
 
@@ -41,15 +42,15 @@ pipeline {
             steps {
                 sh '''
                 echo "Running unit tests in temporary container"
-
-                docker run --name $CONTAINER_NAME $DOCKER_IMAGE_NAME pytest
+                docker run --name $CONTAINER_NAME ${DOCKER_USER_NAME}/${DOCKER_IMAGE_NAME} pytest
                 '''
             }
         }
 
         stage('Remove Test Container') {
             steps {
-                echo "Cleaning test container "
+                sh '''
+                echo "Cleaning test container"
                 docker stop $CONTAINER_NAME || true
                 docker rm -f $CONTAINER_NAME || true
                 '''
@@ -58,26 +59,22 @@ pipeline {
 
         stage('Push Docker Images') {
             steps {
-                script{
+                script {
                     docker.withRegistry('', 'DockerCred') {
-                    sh 'docker push DOCKER_USER_NAME/DOCKER_IMAGE_NAME:latest'
+                        sh "docker push ${DOCKER_USER_NAME}/${DOCKER_IMAGE_NAME}:latest"
                     }
-                 }
+                }
             }
         }
 
-   stage('Run Ansible Playbook') {
+        stage('Run Ansible Playbook') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        playbook: 'deploy.yml',
-                        inventory: 'inventory'
-                     )
-                }
+                ansiblePlaybook(
+                    playbook: 'deploy.yml',
+                    inventory: 'inventory'
+                )
             }
         }
 
     }
 }
-
-
