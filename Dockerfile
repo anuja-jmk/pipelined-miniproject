@@ -1,19 +1,11 @@
-FROM ubuntu:latest
+FROM python:3.10-slim
 
-# Install dos2unix utility
-RUN apt-get update && apt-get install -y dos2unix
-
-# Set the working directory
 WORKDIR /app
 
-# Copy the calculator.sh script into the container
-COPY calculator.sh /app/calculator.sh
+COPY . /app
 
-# Convert line endings to Unix-style
-RUN dos2unix /app/calculator.sh
+RUN pip install --no-cache-dir -r calculator/requirements.txt
 
-# Ensure the script has execute permissions
-RUN chmod +x /app/calculator.sh
+EXPOSE 8050
 
-# Set the default command to execute calculator.sh
-CMD ["bash", "/app/calculator.sh"]
+CMD ["gunicorn", "calculator.app:server", "-b", "0.0.0.0:8050"]
