@@ -10,6 +10,7 @@ pipeline {
         GITHUB_REPO_URL = 'https://github.com/anuja-jmk/pipelined-miniproject.git'
         CONTAINER_NAME = 'calculator'
         DOCKER_USER_NAME = 'anujajose'
+        EMAIL_TO = 'anuja2033@gmail.com'
     }
 
     stages {
@@ -77,4 +78,29 @@ pipeline {
         }
 
     }
+
+
+post {
+    success {
+        mail to: "${EMAIL_TO},203ajmk@gmail.com",
+             subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+             body: """Good news! The build was successful.
+
+Job: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+"""
+    }
+
+    failure {
+        mail to: "${EMAIL_TO},203ajmk@gmail.com",
+             subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+             body: """Unfortunately, the build failed.
+
+Job: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build URL: ${env.BUILD_URL}
+"""
+    }
+}
 }
