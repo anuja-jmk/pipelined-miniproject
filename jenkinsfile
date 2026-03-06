@@ -6,6 +6,8 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'calculator'
         GITHUB_REPO_URL = 'https://github.com/anuja-jmk/pipelined-miniproject.git'
+        CONTAINER_NAME = 'calculator'
+        DOCKER_USER_NAME = 'anujajose'
     }
 
     stages {
@@ -17,11 +19,40 @@ pipeline {
             }
         }
 
+        stage('Cleanup Old Containers') {
+            steps {
+                sh '''
+                echo "Cleaning old container if they exist"
+                docker stop $CONTAINER_NAME || true
+                docker rm -f $CONTAINER_NAME || true
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE_NAME}", '.')
+                    docker.build("${DOCKER_USER_NAME}/${DOCKER_IMAGE_NAME}", ".")
                 }
+            }
+        }
+
+        stage('Run Unit Tests in Test Container') {
+            steps {
+                sh '''
+                echo "Running unit tests in temporary container"
+
+                docker run --name $CONTAINER_NAME $DOCKER_IMAGE_NAME pytest
+                '''
+            }
+        }
+
+        stage('Remove Test Container') {
+            steps {
+                echo "Cleaning test container "
+                docker stop $CONTAINER_NAME || true
+                docker rm -f $CONTAINER_NAME || true
+                '''
             }
         }
 
@@ -29,8 +60,7 @@ pipeline {
             steps {
                 script{
                     docker.withRegistry('', 'DockerCred') {
-                    sh 'docker tag calculator anujajose/calcu:latest'
-                    sh 'docker push anujajose/calcu:latest'
+                    sh 'docker push DOCKER_USER_NAME/DOCKER_IMAGE_NAME:latest'
                     }
                  }
             }
@@ -49,4 +79,5 @@ pipeline {
 
     }
 }
+
 
