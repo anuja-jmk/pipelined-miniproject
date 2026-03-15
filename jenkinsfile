@@ -4,7 +4,6 @@ pipeline {
     triggers { 
         githubPush() 
     }
-
     environment {
         DOCKER_IMAGE_NAME = 'calculator'
         GITHUB_REPO_URL = 'https://github.com/anuja-jmk/pipelined-miniproject.git'
